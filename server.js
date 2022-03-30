@@ -109,13 +109,13 @@ function viewEmployees() {
             [
                 {
                     message: 'Enter department name',
-                    name: 'name'
+                    name: 'dept_name'
                 }
             ]
         ).then((answers) => {
             db.query(
-                'INSERT INTO department (name) VALUES (?)',
-                [answers.name],
+                'INSERT INTO department (dept_name) VALUES (?)',
+                [answers.dept_name],
                 (err, results) => {
                     startMenu();
                 }
@@ -125,34 +125,14 @@ function viewEmployees() {
     }
     
 // add role
-const setDept = (departmentID) => {
-    db.query(`
-    SELECT id AS value, name AS name FROM department`), (err, department) => {
-        inquirer.prompt({
-            type: 'rawlist',
-            message: 'Choose a department',
-            name: 'department',
-            choices: department
-        }).then((answers) => {
-            db.query(
-                'UPDATE role SET department_id = ? WHERE id = ?',
-                [answers.department, departmentID],
-                (err, results) => {
-                    db.query('SELECT * FROM role', (err, roles) => {
-
-                    });
-                    startMenu();
-                }
-            )
-        })
-    }
-}
 const addRole = () => {
+    db.query(
+        `SELECT id AS value, dept_name AS name FROM department`, (err, departments) =>
     inquirer.prompt(
         [
             {
-                message: 'Enter role name',
-                name: 'name'
+                message: 'Enter role title',
+                name: 'title'
             },
             {
                 message: 'Enter salary amount',
@@ -160,21 +140,22 @@ const addRole = () => {
             },
             {
                 message: 'Choose department',
-                type: 'list',
-                name: 'setDept'
-                
+                type: 'rawlist',
+                name: 'dept',
+                choices: departments
             },
         ]
     ).then((answers) => {
         db.query(
-            'INSERT INTO role (name) VALUES (?)',
-            [answers.name],
+            'INSERT INTO role (title, salary, department_id) VALUES (?,?,?)',
+            [answers.name, answers.department, answers.salary],
             (err, results) => {
+                console.log(result);
                 startMenu();
             }
         );
     }
-    );
+    ));
 }
 // function addRole();
 //     let departments = ['Unassigned'];
