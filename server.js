@@ -128,7 +128,7 @@ const addDept = () => {
 const addRole = () => {
     db.query(
         `SELECT id AS value, dept_name AS name FROM department`, (err, departments) => {
-            if(err) console.log(err);
+            if (err) console.log(err);
 
             inquirer.prompt(
                 [
@@ -152,7 +152,7 @@ const addRole = () => {
                     'INSERT INTO role (title, salary, department_id) VALUES (?,?,?)',
                     [answers.title, answers.salary, answers.dept],
                     (err, results) => {
-                        if(err) console.log(err);
+                        if (err) console.log(err);
                         console.log(answers);
                         startMenu();
                     }
@@ -161,60 +161,87 @@ const addRole = () => {
             )
         });
 }
-    // add employee
-    const addEmployee = () => {
+// add employee
+const addEmployee = () => {
+    db.query(
+        `SELECT id AS value, title AS name FROM role`, (err, roles) => {
+            if (err) console.log(err);
+
+            inquirer.prompt(
+                [
+                    {
+                        message: 'Enter first name',
+                        name: 'first_name'
+                    },
+                    {
+                        message: 'Enter last name',
+                        name: 'last_name'
+                    },
+                    {
+                        message: 'Choose role',
+                        type: 'rawlist',
+                        name: 'role',
+                        choices: roles
+                    },
+                ]
+            ).then((answers) => {
+                db.query(
+                    'INSERT INTO employee (first_name, last_name, role_id) VALUES (?,?,?)',
+                    [answers.first_name, answers.last_name, answers.role],
+                    (err, results) => {
+                        if (err) console.log(err);
+                        console.log(answers);
+                        startMenu();
+                    }
+                );
+            }
+            )
+        });
+}
+// change role
+const updateRole = () => {
+    var roleResults;
+    db.query(
+        `SELECT id AS value, title AS name FROM role`, (err, roles) => {
+            if (err) {
+                console.log(err)
+                return;
+            }
+            roleResults = roles;
+        });
         db.query(
-            `SELECT id AS value, title AS name FROM role`, (err, roles) => {
-                if(err) console.log(err);
-    
+            `SELECT id, CONCAT(first_name, ' ', last_name) AS name FROM employee`, (err, employees) => {
+                if (err) console.log(err);
                 inquirer.prompt(
                     [
                         {
-                            message: 'Enter first name',
-                            name: 'first_name'
+                            message: 'Choose employee',
+                            type: 'rawlist',
+                            name: 'employees',
+                            choices: employees
                         },
                         {
-                            message: 'Enter last name',
-                            name: 'last_name'
-                        },
-                        {
-                            message: 'Choose role',
+                            message: 'Choose new role',
                             type: 'rawlist',
                             name: 'role',
-                            choices: roles
+                            choices: roleResults
                         },
                     ]
                 ).then((answers) => {
+                    var employeeName = answers.employees.split(' ');
+                    var employeeFirstName = employeeName[0];
+                    var employeeLastName = employeeName[employeeName.length - 1];
+                    
                     db.query(
-                        'INSERT INTO employee (first_name, last_name, role_id) VALUES (?,?,?)',
-                        [answers.first_name, answers.last_name, answers.role],
+                        'UPDATE employee SET role_id = ? WHERE first_name = ? AND last_name = ?',
+                        [answers.role, employeeFirstName, employeeLastName],
                         (err, results) => {
-                            if(err) console.log(err);
-                            console.log(answers);
+                            if (err) console.log(err);
+                            console.log(results);
                             startMenu();
                         }
                     );
                 }
                 )
             });
-    }
-    // change role
-    const updateRole = () => {
-        db.query(
-            `UPDATE role AS value, title AS name FROM role`, (err, employees) => {
-                if(err) console.log(err);
-                inquirer.prompt(
-                    [
-                        {
-                            message: 'Choose employee',
-                            type: 'rawlist'
-                            name: employees
-                        },
-                        {
-                            message: 'Choose new role',
-                            type: 'rawlist',
-                            name: 'role',
-                            choices: roles
-                        },
-                    ]
-    });
+}
