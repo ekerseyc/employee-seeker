@@ -1,6 +1,6 @@
 const inquirer = require('inquirer');
 const mysql = require('mysql2');
-const consoleTable = require('console.table');
+require('console.table');
 
 const db = mysql.createConnection({
     host: 'localhost',
@@ -52,11 +52,11 @@ function startMenu() {
                 case 'View All Employees':
                     viewEmployees();
                     break;
-                
+
                 case 'Add a Department':
                     addDept();
                     break;
-                
+
                 case 'Add a Role':
                     addRole();
                     break;
@@ -64,7 +64,7 @@ function startMenu() {
                 case 'Add an Employee':
                     addEmployee();
                     break;
-                
+
                 case 'Update an Employee Role':
                     updateRole();
                     break;
@@ -74,13 +74,13 @@ function startMenu() {
                     break;
             }
         });
-function viewDept() {
-    db.query(`SELECT * FROM department`, function (err, results) {
-        if (err) {
-            console.log(err);
-        };
-        console.table(results);
-        startMenu();
+    function viewDept() {
+        db.query(`SELECT * FROM department`, function (err, results) {
+            if (err) {
+                console.log(err);
+            };
+            console.table(results);
+            startMenu();
         });
     };
 };
@@ -91,8 +91,8 @@ function viewRoles() {
         };
         console.table(results);
         startMenu();
-        });
-    };
+    });
+};
 function viewEmployees() {
     db.query(`SELECT * FROM employee`, function (err, results) {
         if (err) {
@@ -101,94 +101,120 @@ function viewEmployees() {
         console.table(results);
 
         startMenu();
-        });
-    };
-    // add department
-    const addDept = () => {
-        inquirer.prompt(
-            [
-                {
-                    message: 'Enter department name',
-                    name: 'dept_name'
-                }
-            ]
-        ).then((answers) => {
-            db.query(
-                'INSERT INTO department (dept_name) VALUES (?)',
-                [answers.dept_name],
-                (err, results) => {
-                    startMenu();
-                }
-            );
-        }
-        );
-    }
-    
-// add role
-const addRole = () => {
-    db.query(
-        `SELECT id AS value, dept_name AS name FROM department`, (err, departments) =>
+    });
+};
+// add department
+const addDept = () => {
     inquirer.prompt(
         [
             {
-                message: 'Enter role title',
-                name: 'title'
-            },
-            {
-                message: 'Enter salary amount',
-                name: 'salary'
-            },
-            {
-                message: 'Choose department',
-                type: 'rawlist',
-                name: 'dept',
-                choices: departments
-            },
+                message: 'Enter department name',
+                name: 'dept_name'
+            }
         ]
     ).then((answers) => {
         db.query(
-            'INSERT INTO role (title, salary, department_id) VALUES (?,?,?)',
-            [answers.name, answers.department, answers.salary],
+            'INSERT INTO department (dept_name) VALUES (?)',
+            [answers.dept_name],
             (err, results) => {
-                console.log(result);
                 startMenu();
             }
         );
     }
-    ));
+    );
 }
-// function addRole();
-//     let departments = ['Unassigned'];
-//         let questions = [
-//             'Please enter the role\'s title',
-//             'Please enter the role\'s salary (numbers only, no commas)',
-//             'Please select the role\'s department'
-//         ];
-//         inquirer.prompt([
-//             {
-//                 type: 'input',
-//                 name: 'role',
-//                 message: questions[0]
-//             },
-//             {
-//                 type: 'number',
-//                 name: 'salary',
-//                 message: questions[1]
-//             },
-//             {
-//                 type: 'list',
-//                 name: 'department',
-//                 message: questions[2],
-//                 choices: departments
-//             }
-//         ]).then((data) => {
-//             let deptId = null;
-//             for (let i = 0; i < results.length; i++) {
-//                 if (results.name === data.department) {
-//                 deptId = res[i].id;
-//                 break;
-//             }
-//         }
-//     })
+
+// add role
+const addRole = () => {
+    db.query(
+        `SELECT id AS value, dept_name AS name FROM department`, (err, departments) => {
+            if(err) console.log(err);
+
+            inquirer.prompt(
+                [
+                    {
+                        message: 'Enter role title',
+                        name: 'title'
+                    },
+                    {
+                        message: 'Enter salary amount',
+                        name: 'salary'
+                    },
+                    {
+                        message: 'Choose department',
+                        type: 'rawlist',
+                        name: 'dept',
+                        choices: departments
+                    },
+                ]
+            ).then((answers) => {
+                db.query(
+                    'INSERT INTO role (title, salary, department_id) VALUES (?,?,?)',
+                    [answers.title, answers.salary, answers.dept],
+                    (err, results) => {
+                        if(err) console.log(err);
+                        console.log(answers);
+                        startMenu();
+                    }
+                );
+            }
+            )
+        });
+}
     // add employee
+    const addEmployee = () => {
+        db.query(
+            `SELECT id AS value, title AS name FROM role`, (err, roles) => {
+                if(err) console.log(err);
+    
+                inquirer.prompt(
+                    [
+                        {
+                            message: 'Enter first name',
+                            name: 'first_name'
+                        },
+                        {
+                            message: 'Enter last name',
+                            name: 'last_name'
+                        },
+                        {
+                            message: 'Choose role',
+                            type: 'rawlist',
+                            name: 'role',
+                            choices: roles
+                        },
+                    ]
+                ).then((answers) => {
+                    db.query(
+                        'INSERT INTO employee (first_name, last_name, role_id) VALUES (?,?,?)',
+                        [answers.first_name, answers.last_name, answers.role],
+                        (err, results) => {
+                            if(err) console.log(err);
+                            console.log(answers);
+                            startMenu();
+                        }
+                    );
+                }
+                )
+            });
+    }
     // change role
+    const updateRole = () => {
+        db.query(
+            `UPDATE role AS value, title AS name FROM role`, (err, employees) => {
+                if(err) console.log(err);
+                inquirer.prompt(
+                    [
+                        {
+                            message: 'Choose employee',
+                            type: 'rawlist'
+                            name: employees
+                        },
+                        {
+                            message: 'Choose new role',
+                            type: 'rawlist',
+                            name: 'role',
+                            choices: roles
+                        },
+                    ]
+    });
