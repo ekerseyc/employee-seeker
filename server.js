@@ -209,39 +209,39 @@ const updateRole = () => {
             }
             roleResults = roles;
         });
-        db.query(
-            `SELECT id, CONCAT(first_name, ' ', last_name) AS name FROM employee`, (err, employees) => {
-                if (err) console.log(err);
-                inquirer.prompt(
-                    [
-                        {
-                            message: 'Choose employee',
-                            type: 'rawlist',
-                            name: 'employees',
-                            choices: employees
-                        },
-                        {
-                            message: 'Choose new role',
-                            type: 'rawlist',
-                            name: 'role',
-                            choices: roleResults
-                        },
-                    ]
-                ).then((answers) => {
-                    var employeeName = answers.employees.split(' ');
-                    var employeeFirstName = employeeName[0];
-                    var employeeLastName = employeeName[employeeName.length - 1];
-                    
-                    db.query(
-                        'UPDATE employee SET role_id = ? WHERE first_name = ? AND last_name = ?',
-                        [answers.role, employeeFirstName, employeeLastName],
-                        (err, results) => {
-                            if (err) console.log(err);
-                            console.log(results);
-                            startMenu();
-                        }
-                    );
-                }
-                )
-            });
+    db.query(
+        `SELECT id, CONCAT(first_name, ' ', last_name) AS name FROM employee`, (err, employees) => {
+            if (err) console.log(err);
+            inquirer.prompt(
+                [
+                    {
+                        message: 'Choose employee',
+                        type: 'rawlist',
+                        name: 'employees',
+                        choices: employees
+                    },
+                    {
+                        message: 'Choose new role',
+                        type: 'rawlist',
+                        name: 'role',
+                        choices: roleResults
+                    },
+                ]
+            ).then((answers) => {
+                var employeeName = answers.employees.split(' ');
+                var employeeFirstName = employeeName[0];
+                var employeeLastName = employeeName[employeeName.length - 1];
+
+                db.query(
+                    'UPDATE employee SET role_id = ? WHERE first_name = ? AND last_name = ?',
+                    [answers.role, employeeFirstName, employeeLastName],
+                    (err, results) => {
+                        if (err) console.log(err);
+                        console.log(results);
+                        startMenu();
+                    }
+                );
+            }
+            )
+        });
 }
